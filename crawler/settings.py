@@ -7,12 +7,17 @@
 #
 #     http://doc.scrapy.org/en/latest/topics/settings.html
 #
-
 BOT_NAME = 'crawler'
 
 SPIDER_MODULES = ['crawler.spiders']
 NEWSPIDER_MODULE = 'crawler.spiders'
-ITEM_PIPELINES = ['crawler.pipelines.JsonWithEncodingPipeline']
+ITEM_PIPELINES = ['crawler.pipelines.DbPipeline']
 
-# Crawl responsibly by identifying yourself (and your website) on the user-agent
-#USER_AGENT = 'crawler (+http://www.yourdomain.com)'
+
+DATABASE = {'drivername': 'postgres',
+            'host': 'localhost',
+            'port': '5432',
+            'username': 'postgres',
+            'password': '1234',
+            'database': 'salon24'}
+

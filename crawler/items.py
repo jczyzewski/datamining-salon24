@@ -19,8 +19,12 @@ class PostItem(Item):
     category = Field()
     link = Field()
     title = Field()
-    author = Field()
+    author_id = Field()
     urls = Field()
     urls_from_text = Field()
     comments = Field()
     tags = Field()
+    urls = Field()
+
+    def __str__(self):
+        return self['link']
