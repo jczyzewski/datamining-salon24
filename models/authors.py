@@ -11,7 +11,7 @@ class Authors(Base):
     __tablename__ = "authors"
 
     id = Column(Integer, primary_key=True)
-    bloglink = Column("bloglink", String)
-    name = Column("name", String)
+    bloglink = Column("bloglink", String, unique=True)
+    name = Column("name", String, unique=True)
     posts = relationship("Posts", order_by="Posts.id", backref="authors")
     comments = relationship("Comments", order_by="Comments.id", backref="authors")

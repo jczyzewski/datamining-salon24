@@ -27,4 +27,4 @@ class PostItem(Item):
     urls = Field()
 
     def __str__(self):
-        return self['link']
+        return self['link']+self['date']

@@ -44,7 +44,7 @@ class DbPipeline(object):
             db_item.urls = urls if urls and urls is not "''" else None
         if isinstance(item, AuthorItem):
             db_item = Authors(**item)
-            db_item.name = ''.join(db_item.name).strip().replace('"', '')
+            db_item.name = ''.join(db_item.name).strip().replace('"', '').upper()
 
         try:
             self.session.add(db_item)
@@ -71,7 +71,7 @@ class DbPipeline(object):
             if author is None:
                 new_author = Authors()
                 name = c['author_id']
-                new_author.name = ''.join(name).strip().replace('"', '')
+                new_author.name = ''.join(name).strip().replace('"', '').upper()
                 new_author.bloglink = ''.join(c['author_bloglink']).replace('"', '')
                 session = self.session
                 try:

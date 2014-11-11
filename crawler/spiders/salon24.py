@@ -6,6 +6,7 @@ from scrapy.contrib.linkextractors import LinkExtractor
 from scrapy.selector import HtmlXPathSelector
 from crawler.items import AuthorItem, PostItem
 from dateutil import parser
+from datetime import datetime
 
 
 class Salon24Spider(CrawlSpider):
@@ -41,7 +42,7 @@ class Salon24Spider(CrawlSpider):
         post = PostItem()
         date = response.xpath(
             "//div[@class='content-left']/article[@class='post']/header/span[1]/text()").extract()
-        post['date'] = parser.parse(date[0])
+        post['date'] = self.parse_date(date[0])
         post['category'] = response.xpath(
             "//div[@class='content-left']/article[@class='post']/header/span[2]/text()").extract()
         post['link'] = response.url
@@ -64,7 +65,28 @@ class Salon24Spider(CrawlSpider):
                     'author_bloglink': li.xpath("div[@class='author-box']/div/a/@href").extract(),
                     'urls': ';'.join([s.encode('utf-8') for s in
                                       li.xpath("div[@class='comment-body'][1]//a/@href").extract()]).strip(),
-                    'date': parser.parse(date[0]) if date else None}
+                    'date': self.parse_date(date[0]) if date else None}
             comments.append(cmnt)
         post['comments'] = comments
         return post
+
+
+    def parse_date(self, date):
+        """
+        Dates at salon24 come at three different formats
+        :param date:
+        """
+        full_date_format = "%d.%m.%Y %H:%M"
+        current_year_date_format = "%d.%m %H:%M"
+        current_day_date_format = "%H:%M"
+        try:
+            parsed = datetime.strptime(date, full_date_format);
+        except ValueError:
+            try:
+                today = datetime.now()
+                parsed = datetime.strptime(date, current_year_date_format);
+                parsed = parsed.replace(year=today.year);
+            except ValueError:
+                parsed = datetime.strptime(date, current_day_date_format);
+                parsed = parsed.replace(year=today.year, month=today.month, day=today.day);
+        return parsed
