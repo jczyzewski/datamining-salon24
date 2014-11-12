@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 import re
-import scrapy
+from datetime import datetime
+
 from scrapy.contrib.spiders import CrawlSpider, Rule
 from scrapy.contrib.linkextractors import LinkExtractor
-from scrapy.selector import HtmlXPathSelector
+from scrapy.selector import Selector
+
 from crawler.items import AuthorItem, PostItem
-from dateutil import parser
-from datetime import datetime
 
 
 class Salon24Spider(CrawlSpider):
@@ -15,17 +15,20 @@ class Salon24Spider(CrawlSpider):
     # start from the first page of blog catalog
     start_urls = (
         'http://www.salon24.pl/katalog-blogow/0,1,Nick,1',
-        # 'http://zamuleni.salon24.pl/239547,zaduzeni-polszczyzna',
     )
     rules = (
         # follow catalog pages
         Rule(LinkExtractor(allow=('http://www.salon24.pl/catalog/0,\d,Nick,1', ), )),
 
         # Extract blog's links and parse them
-        Rule(LinkExtractor(allow=('\S+\.salon24\.pl/$', )), callback='parse_blog_link', follow=True),
+        Rule(LinkExtractor(allow=('\S+\.salon24\.pl/$', )),
+             callback='parse_blog_link', follow=True),
 
+        # blog subpages
+        Rule(LinkExtractor(allow='\S+\.salon24\.pl/posts/0,\d+,wszystkie')),
         # post page
-        Rule(LinkExtractor(allow=('\S+\.salon24\.pl/\d+,\S+', ), restrict_xpaths="//div[@class='main-post-list']"),
+        # example: http://rybitzky.salon24.pl/posts/0,2,wszystkie
+        Rule(LinkExtractor(allow=('\S+\.salon24\.pl/\d+,\S+', ), restrict_xpaths="//ul[@class='post-list']"),
              callback='parse_post_page', follow=False),
     )
 
@@ -54,9 +57,9 @@ class Salon24Spider(CrawlSpider):
         post['urls'] = response.xpath(
             "//div[@class='bbtext']//a/@href").extract()
         post['tags'] = response.xpath("//div[@class='post-tags']/a//text()").extract()
-        selector = HtmlXPathSelector(response)
+        selector = Selector(response)
         comments = []
-        for li in selector.select("////*[@id='komentarze']/ul/li"):
+        for li in selector.xpath("////*[@id='komentarze']/ul/li"):
             date = li.xpath("div[@class='author-box']/div/span/text()").extract()
             cmnt = {'title': ''.join(li.xpath("h3/text()").extract()).strip(),
                     'content': ''.join([s.encode('utf-8') for s in
