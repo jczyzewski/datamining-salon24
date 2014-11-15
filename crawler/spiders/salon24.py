@@ -87,9 +87,9 @@ class Salon24Spider(CrawlSpider):
         except ValueError:
             try:
                 today = datetime.now()
-                parsed = datetime.strptime(date, current_year_date_format);
-                parsed = parsed.replace(year=today.year);
+                parsed = datetime.strptime(date, current_year_date_format)
+                parsed = parsed.replace(year=today.year)
             except ValueError:
-                parsed = datetime.strptime(date, current_day_date_format);
-                parsed = parsed.replace(year=today.year, month=today.month, day=today.day);
+                parsed = datetime.strptime(date, current_day_date_format)
+                parsed = parsed.replace(year=today.year, month=today.month, day=today.day)
         return parsed

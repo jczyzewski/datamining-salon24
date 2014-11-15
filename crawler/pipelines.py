@@ -4,6 +4,7 @@
 #
 # Don't forget to add your pipeline to the ITEM_PIPELINES setting
 # See: http://doc.scrapy.org/en/latest/topics/item-pipeline.html
+import re
 from sqlalchemy.orm import sessionmaker
 
 from crawler.items import PostItem, AuthorItem
@@ -27,7 +28,6 @@ class DbPipeline(object):
         self.TagsService = TagsService(session=self.session)
 
     def process_item(self, item, spider):
-
         if isinstance(item, PostItem):
             db_item = Posts()
             author = self.AuthorService.get_author_by_name(item['author_id'][0])
@@ -39,7 +39,6 @@ class DbPipeline(object):
             db_item.title = ''.join(item['title']).strip()
             db_item.comments = self.process_comments(item['comments'])
             db_item.tags = self.process_tags(item['tags'])
-            # db_item.urls=item['urls']
             urls = ";".join([url for url in item['urls'] if "salon24.pl" in url]).strip()
             db_item.urls = urls if urls and urls is not "''" else None
         if isinstance(item, AuthorItem):
@@ -62,7 +61,8 @@ class DbPipeline(object):
         for c in comments:
 
             new_comment = Comments(**c)
-            urls = ";".join([url for url in c['urls'] if "salon24.pl" in url]).strip()
+            salon_urls_regex = re.compile("\S+\.salon24\.pl\S*")
+            urls = ";".join(salon_urls_regex.findall(new_comment.content)).strip()
             new_comment.urls = urls if urls and urls is not "''" else None
             if not c['author_id']:
                 continue
@@ -83,15 +83,8 @@ class DbPipeline(object):
                 new_comment.author_id = new_author.id
             else:
                 new_comment.author_id = author.id
-            # match parent comment
             if new_comment.title.startswith('@'):
-                ref_comment_author = new_comment.title.replace('@', '')
-                ref_comment_author_id = self.AuthorService.get_author_by_name(ref_comment_author)
-                if ref_comment_author_id is not None:
-                    # parent_comment = next((c for c in cmnts_list if c.author_id == ref_comment_author_id.id), None)
-                    for cm in reversed(cmnts_list):
-                        if cm.author_id == ref_comment_author_id.id:
-                            new_comment.parent_comment = cm.id
+                self.match_parent_comment(cmnts_list, new_comment)
 
             cmnts_list.append(new_comment)
             self.session.add(new_comment)
@@ -106,3 +99,11 @@ class DbPipeline(object):
             tag = tag if tag is not None else Tags(t)
             tags_list.append(tag)
         return tags_list
+
+    def match_parent_comment(self, cmnts_list, new_comment):
+        ref_comment_author = new_comment.title.replace('@', '')
+        ref_comment_author_id = self.AuthorService.get_author_by_name(ref_comment_author)
+        if ref_comment_author_id is not None:
+            for cm in reversed(cmnts_list):
+                if cm.author_id == ref_comment_author_id.id:
+                    new_comment.parent_comment = cm.id
