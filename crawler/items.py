@@ -24,7 +24,6 @@ class PostItem(Item):
     urls_from_text = Field()
     comments = Field()
     tags = Field()
-    urls = Field()
 
     def __str__(self):
         return self['link']

@@ -1,6 +1,7 @@
-from db_models import Base
-from sqlalchemy import Column, Integer, String, Text, Date, ForeignKey, TIMESTAMP, Table
+from sqlalchemy import Column, Integer, String, Text, ForeignKey, TIMESTAMP, Table
 from sqlalchemy.orm import relationship
+
+from db_models import Base
 
 
 def create_posts_table(engine):
@@ -8,8 +9,8 @@ def create_posts_table(engine):
 
 
 post_tags = Table('post_tags', Base.metadata,
-                      Column('post_id', Integer, ForeignKey('posts.id')),
-                      Column('tag_id', Integer, ForeignKey('tags.id')))
+                  Column('post_id', Integer, ForeignKey('posts.id')),
+                  Column('tag_id', Integer, ForeignKey('tags.id')))
 
 
 class Posts(Base):
@@ -22,7 +23,7 @@ class Posts(Base):
     link = Column("link", String)
     title = Column("title", String)
     author_id = Column("author_id", Integer, ForeignKey('authors.id'))
-    urls = Column("urls",String)
+    urls = Column("urls", String)
     comments = relationship("Comments", order_by="Comments.id", backref="post")
     tags = relationship('Tags', secondary=post_tags, backref='posts')
 

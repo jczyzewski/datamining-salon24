@@ -32,7 +32,6 @@ class Salon24Spider(CrawlSpider):
              callback='parse_post_page', follow=False),
     )
 
-
     def parse_blog_link(self, response):
         autor = AuthorItem()
         autor['bloglink'] = response.url
@@ -73,7 +72,6 @@ class Salon24Spider(CrawlSpider):
         post['comments'] = comments
         return post
 
-
     def parse_date(self, date):
         """
         Dates at salon24 come at three different formats
@@ -82,11 +80,11 @@ class Salon24Spider(CrawlSpider):
         full_date_format = "%d.%m.%Y %H:%M"
         current_year_date_format = "%d.%m %H:%M"
         current_day_date_format = "%H:%M"
+        today = datetime.now()
         try:
-            parsed = datetime.strptime(date, full_date_format);
+            parsed = datetime.strptime(date, full_date_format)
         except ValueError:
             try:
-                today = datetime.now()
                 parsed = datetime.strptime(date, current_year_date_format)
                 parsed = parsed.replace(year=today.year)
             except ValueError:

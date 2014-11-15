@@ -1,5 +1,6 @@
+from sqlalchemy import Column, Integer, String
+
 from db_models import Base
-from sqlalchemy import Column, Integer, String, Table, ForeignKey
 
 
 class Tags(Base):

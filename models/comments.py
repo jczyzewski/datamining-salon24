@@ -1,5 +1,6 @@
-from db_models import Base
 from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, ForeignKey
+
+from db_models import Base
 
 
 class Comments(Base):
@@ -12,5 +13,5 @@ class Comments(Base):
     title = Column("title", String)
     author_id = Column("author_id", Integer, ForeignKey('authors.id'))
     post_id = Column("post_id", Integer, ForeignKey('posts.id'))
-    urls = Column("urls",String)
+    urls = Column("urls", String)
     author_bloglink = ""
